@@ -49,7 +49,7 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 fi
 
 if [ "$1" = 'help' ]; then
-    echo "Usage: $(basename "$0") (postgres|bottledwater|all|help)"
+    echo "Usage: $(basename "$0") (postgres|bottledwater|help)"
 elif [ "$1" = 'postgres' ]; then
 	mkdir -p "$PGDATA"
 	chown -R "$(id -u)" "$PGDATA" 2>/dev/null || :
@@ -177,23 +177,6 @@ elif [ "$1" = 'bottledwater' ]; then
 		echo "ERROR: missing mandatory config: KAFKA_BROKER_LISTS"
 		exit 1
 	fi
-
-	exec bottledwater -d $POSTGRES_URI -b $KAFKA_BROKER_LISTS -p postgres -e log -f json
-elif [ "$1" = 'all' ]; then
-	if [[ -z "$POSTGRES_URI" ]]; then
-		echo "ERROR: missing mandatory config: POSTGRES_URI"
-		exit 1
-	fi
-
-	if [[ -z "$KAFKA_BROKER_LISTS" ]]; then
-		echo "ERROR: missing mandatory config: KAFKA_BROKER_LISTS"
-		exit 1
-	fi
-
-	PGUSER="${PGUSER:-$POSTGRES_USER}" \
-	pg_ctl -D "$PGDATA" \
-		-o "-c listen_addresses='*'" \
-		-w start
 
 	exec bottledwater -d $POSTGRES_URI -b $KAFKA_BROKER_LISTS -p postgres -e log -f json
 fi
